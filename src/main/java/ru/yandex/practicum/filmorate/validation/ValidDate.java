@@ -13,8 +13,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = DateValidator.class)
 @Documented
-public @interface ValidDate{
-    String message() default "{message.key}";
+public @interface ValidDate {
+    String message() default "Валидация провалена";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
     String targetDate() default "";
