@@ -25,14 +25,14 @@ public class UserController {
     @PostMapping()
     public User addUser(@Valid @RequestBody User user) {
         if (user == null) {
+            log.error("Произошла ошибка создания пользователя. Отсутствует пользователь для создания");
             throw new ValidationException("Отсутствует пользователь для создания");
         }
-        user.setId(sequenceId);
+        user.setId(generateId());
         users.put(user.getId(), user);
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
-        sequenceId++;
         log.info("Добавлен пользователь {}", user);
         return user;
     }
@@ -41,6 +41,7 @@ public class UserController {
     public User updateUser(@RequestBody User user) {
         User updUser = users.get(user.getId());
         if (updUser == null) {
+            log.error("Произошла ошибка обновления пользователя. Отсутствует пользователь для обновления");
             throw new ValidationException("Отсутствует пользователь для обновления");
         }
         users.put(updUser.getId(), user);
@@ -53,7 +54,11 @@ public class UserController {
 
     @GetMapping()
     public Collection<User> findAll() {
-        log.info("Получен список пользователей");
+        log.info("Получение списка пользователей");
         return users.values();
+    }
+
+    public Integer generateId() {
+        return sequenceId++;
     }
 }

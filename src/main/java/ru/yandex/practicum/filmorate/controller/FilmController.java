@@ -25,11 +25,11 @@ public class FilmController {
     @PostMapping()
     public Film addFilm(@Valid @RequestBody Film film) {
         if (film == null) {
+            log.error("Произошла ошибка создания фильма. Отсутствует фильм для создания");
             throw new ValidationException("Отсутствует фильм для создания");
         }
-        film.setId(sequenceId);
+        film.setId(generateId());
         films.put(film.getId(), film);
-        sequenceId++;
         log.info("Добавлен фильм {}", film);
         return film;
     }
@@ -38,6 +38,7 @@ public class FilmController {
     public Film updateFilm(@RequestBody Film film) {
         Film updFilm = films.get(film.getId());
         if (updFilm == null) {
+            log.error("Произошла ошибка обновления фильма. Отсутствует фильм для обновления");
             throw new ValidationException("Отсутствует фильм для обновления");
         }
         films.put(film.getId(), film);
@@ -47,7 +48,11 @@ public class FilmController {
 
     @GetMapping()
     public Collection<Film> findAll() {
-        log.info("Получен список фильмов");
+        log.info("Получение списка всех фильмов");
         return films.values();
+    }
+
+    public Integer generateId() {
+        return sequenceId++;
     }
 }
