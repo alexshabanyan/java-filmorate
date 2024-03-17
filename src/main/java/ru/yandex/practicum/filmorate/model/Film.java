@@ -8,13 +8,16 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Film.
  */
 @Data
 public class Film {
-    Integer id;
+    Long id;
 
     @NotBlank
     String name;
@@ -28,4 +31,15 @@ public class Film {
     @NotNull
     @Positive
     Integer duration;
+
+    Set<Long> likes;
+
+    public Film(Long id, String name, String description, LocalDate releaseDate, Integer duration, Set<Long> likes) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.likes = Objects.requireNonNullElseGet(likes, HashSet::new);
+    }
 }
