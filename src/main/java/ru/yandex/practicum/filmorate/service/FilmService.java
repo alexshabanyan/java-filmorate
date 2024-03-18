@@ -18,7 +18,7 @@ public class FilmService {
     private static final Comparator<Film> FILM_COMPARATOR_SORT_BY_LIKES = Comparator
             .comparing(film -> film.getLikes().size(), Comparator.reverseOrder());
 
-    FilmStorage filmStorage;
+    private final FilmStorage filmStorage;
 
     public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
