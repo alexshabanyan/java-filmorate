@@ -1,58 +1,57 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "films")
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private Integer sequenceId = 1;
+    private final FilmService filmService;
 
     @PostMapping()
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (film == null) {
-            log.error("Произошла ошибка создания фильма. Отсутствует фильм для создания");
-            throw new ValidationException("Отсутствует фильм для создания");
-        }
-        film.setId(generateId());
-        films.put(film.getId(), film);
-        log.info("Добавлен фильм {}", film);
-        return film;
+        return filmService.addFilm(film);
     }
 
     @PutMapping()
     public Film updateFilm(@RequestBody Film film) {
-        Film updFilm = films.get(film.getId());
-        if (updFilm == null) {
-            log.error("Произошла ошибка обновления фильма. Отсутствует фильм для обновления");
-            throw new ValidationException("Отсутствует фильм для обновления");
-        }
-        films.put(film.getId(), film);
-        log.info("Обновлен фильм {}", film);
-        return film;
+        return filmService.updateFilm(film);
     }
 
     @GetMapping()
     public Collection<Film> findAll() {
-        log.info("Получение списка всех фильмов");
-        return films.values();
+        return filmService.findAll();
     }
 
-    public Integer generateId() {
-        return sequenceId++;
+    @PutMapping(path = "{id}/like/{userId}")
+    public Film setLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.setLike(id, userId);
+    }
+
+    @DeleteMapping(path = "{id}/like/{userId}")
+    public Film deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
+        log.info("Получение списка популярных фильмов count={}", count);
+        return filmService.getPopular(count);
     }
 }
