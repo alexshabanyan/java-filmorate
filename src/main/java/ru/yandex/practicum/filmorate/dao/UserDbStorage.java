@@ -1,4 +1,4 @@
 package ru.yandex.practicum.filmorate.dao;
 
-public class UserDao {
+public class UserDbStorage {
 }
