@@ -1,6 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.Value;
+import lombok.experimental.NonFinal;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 import ru.yandex.practicum.filmorate.validation.ValidDate;
 
 import javax.validation.constraints.NotBlank;
@@ -8,11 +13,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-/**
- * Film.
- */
-@Data
+@Value
+@Jacksonized
+@SuperBuilder(toBuilder = true)
 public class Film {
     Long id;
 
@@ -29,14 +36,26 @@ public class Film {
     @Positive
     Integer duration;
 
-    Long mpaId;
+    @NonFinal
+    @Builder.Default
+    Set<Genre> genres = new HashSet<>();
 
-    public Film(Long id, String name, String description, LocalDate releaseDate, Integer duration, Long mpaId) {
+    Mpa mpa;
+
+    public Film(Long id,
+                String name,
+                String description,
+                LocalDate releaseDate,
+                Integer duration,
+                Mpa mpa,
+                Set<Genre> genres
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.mpaId = mpaId;
+        this.mpa = mpa;
+        this.genres = Objects.requireNonNullElseGet(genres, HashSet::new);
     }
 }

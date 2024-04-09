@@ -11,6 +11,4 @@ public interface FilmStorage {
     Collection<Film> findAll();
 
     Film findFilm(Long id);
-
-    Long generateId();
 }
