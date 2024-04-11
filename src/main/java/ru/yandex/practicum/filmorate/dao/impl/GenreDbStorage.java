@@ -1,9 +1,11 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.impl;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ItemNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.dao.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +28,11 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Genre getGenre(Long id) {
         String sqlQuery = "select * from genre where id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapToRowGenre, id);
+        try {
+            return jdbcTemplate.queryForObject(sqlQuery, this::mapToRowGenre, id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ItemNotFoundException(id, "Жанр не найден id=" + id);
+        }
     }
 
     private Genre mapToRowGenre(ResultSet rs, int rowNum) throws SQLException {

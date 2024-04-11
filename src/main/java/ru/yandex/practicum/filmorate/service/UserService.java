@@ -3,12 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ItemNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -19,89 +17,65 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        return userStorage.addUser(user);
+        return userStorage.create(user);
     }
 
     public User updateUser(User user) {
-        if (user.getId() == null) {
-            throw new ValidationException("Отсутствует идендификатор пользователя");
-        } else if (getUser(user.getId()) == null) {
-            throw new ItemNotFoundException(user.getId());
-        }
-        return userStorage.updateUser(user);
+        return userStorage.update(user);
     }
 
     public Collection<User> findAll() {
-        return userStorage.findAll();
+        return userStorage.readAll();
     }
 
     public User getUser(Long id) {
-        User user = userStorage.getUser(id);
+        User user = userStorage.read(id);
         if (user == null) {
             throw new ItemNotFoundException(id);
         }
         return user;
     }
 
-    public User addFriend(Long id, Long friendId) {
-        User user = getUser(id);
-        User friend = getUser(friendId);
-
-        if (user == null) {
-            throw new ItemNotFoundException(id);
-        } else if (friend == null) {
-            throw new ItemNotFoundException(friendId);
-        }
-
-        user.getFriends().add(friendId);
-        friend.getFriends().add(id);
-
-        updateUser(user);
-        updateUser(friend);
-
-        return user;
-    }
-
-    public User deleteFriend(Long id, Long friendId) {
-        User user = getUser(id);
-        User friend = getUser(friendId);
-
-        if (user == null) {
-            throw new ItemNotFoundException(id);
-        } else if (friend == null) {
-            throw new ItemNotFoundException(friendId);
-        }
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(id);
-
-        updateUser(user);
-        updateUser(friend);
-
-        return user;
+    public void addFriend(Long userId, Long friendId) {
+        userStorage.addFriend(userId, friendId);
     }
 
     public Collection<User> getFriends(Long id) {
-        User user = getUser(id);
-        if (user == null) {
-            throw new ItemNotFoundException(id);
-        }
-        return getUser(id).getFriends().stream()
-                .map(this::getUser)
-                .collect(Collectors.toList());
+        return userStorage.getFriends(id);
     }
 
-    public Collection<User> getCommonFriends(Long id, Long friendId) {
-        User user = getUser(id);
-        if (user == null) {
-            throw new ItemNotFoundException(id);
-        }
-        return getUser(id).getFriends().stream()
-                .filter(i -> containsFriend(friendId, i)).collect(Collectors.toSet()).stream()
-                .map(this::getUser).collect(Collectors.toList());
+    public void deleteFriend(Long id, Long friendId) {
+        userStorage.deleteFriend(id, friendId);
     }
 
-    public Boolean containsFriend(Long id, Long friendId) {
-        return getUser(id).getFriends().contains(friendId);
+    public Collection<User> getCommonFriends(Long id, Long otherId) {
+        Collection<User> userFriends = userStorage.getFriends(id);
+        Collection<User> friendFriends = userStorage.getFriends(otherId);
+        userFriends.retainAll(friendFriends);
+        return userFriends;
     }
+//
+//    public Collection<User> getFriends(Long id) {
+//        User user = getUser(id);
+//        if (user == null) {
+//            throw new ItemNotFoundException(id);
+//        }
+//        return getUser(id).getFriends().stream()
+//                .map(this::getUser)
+//                .collect(Collectors.toList());
+//    }
+//
+//    public Collection<User> getCommonFriends(Long id, Long friendId) {
+//        User user = getUser(id);
+//        if (user == null) {
+//            throw new ItemNotFoundException(id);
+//        }
+//        return getUser(id).getFriends().stream()
+//                .filter(i -> containsFriend(friendId, i)).collect(Collectors.toSet()).stream()
+//                .map(this::getUser).collect(Collectors.toList());
+//    }
+//
+//    public Boolean containsFriend(Long id, Long friendId) {
+//        return getUser(id).getFriends().contains(friendId);
+//    }
 }

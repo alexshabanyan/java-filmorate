@@ -1,20 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import lombok.Value;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 
-/**
- * User.
- */
-
-@Data
+@Value
+@Jacksonized
+@SuperBuilder(toBuilder = true)
 public class User {
     Long id;
 
@@ -29,9 +26,7 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     LocalDate birthday;
 
-    Set<Long> friends;
-
-    public User(Long id, String email, String login, String name, LocalDate birthday, Set<Long> friends) {
+    public User(Long id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
         this.email = email;
         this.login = login;
@@ -41,6 +36,5 @@ public class User {
             this.name = name;
         }
         this.birthday = birthday;
-        this.friends = Objects.requireNonNullElseGet(friends, HashSet::new);
     }
 }
