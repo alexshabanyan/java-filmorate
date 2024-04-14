@@ -106,6 +106,11 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> filmMapper(rs), count);
     }
 
+    @Override
+    public boolean isExist(Long id) {
+        return false;
+    }
+
     private Set<Genre> getGenres(Long filmId) {
         String sql = "SELECT g.ID, g.NAME FROM FILM_GENRE fg JOIN GENRE g ON fg.GENRE_ID = g.ID WHERE fg.FILM_ID  = ? ORDER BY g.ID";
 

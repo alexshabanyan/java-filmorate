@@ -12,4 +12,6 @@ public interface CrudStorage<T> {
     T read(Long id);
 
     void delete(Long id);
+
+    boolean isExist(Long id);
 }

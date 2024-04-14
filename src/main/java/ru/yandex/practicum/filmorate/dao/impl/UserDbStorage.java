@@ -72,13 +72,19 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void delete(Long id) {
-
+        jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
     }
 
     @Override
     public void addFriend(Long userId, Long friendId) {
-        read(userId);
-        read(friendId);
+        if (!isExist(userId)) {
+            throw new ItemNotFoundException(userId);
+        }
+
+        if (!isExist(friendId)) {
+            throw new ItemNotFoundException(friendId);
+        }
+
         String userSqlQuery = "SELECT * FROM friendship where user_id = ? and send_to = ?";
         SqlRowSet userFriendship = jdbcTemplate.queryForRowSet(userSqlQuery, userId, friendId);
         SqlRowSet friendFriendship = jdbcTemplate.queryForRowSet(userSqlQuery, friendId, userId);
@@ -95,8 +101,14 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteFriend(Long userId, Long friendId) {
-        read(userId);
-        read(friendId);
+        if (!isExist(userId)) {
+            throw new ItemNotFoundException(userId);
+        }
+
+        if (!isExist(friendId)) {
+            throw new ItemNotFoundException(friendId);
+        }
+
         int updated = jdbcTemplate.update("DELETE FROM friendship WHERE user_id = ? AND send_to = ?",
                 userId, friendId);
         if (updated > 0) {
@@ -111,6 +123,17 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.query("SELECT u.* FROM friendship AS fr " +
                         "LEFT JOIN users AS u ON fr.send_to = u.id WHERE fr.user_id = ?",
                 (rs, rowNum) -> userMapper(rs), id);
+    }
+
+    @Override
+    public boolean isExist(Long id) {
+        try {
+            String sqlQuery = "SELECT COUNT(*) FROM USERS WHERE id = ?";
+            int count = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
+            return count > 0;
+        } catch (EmptyResultDataAccessException e) {
+            throw new ItemNotFoundException(id);
+        }
     }
 
     private User userMapper(ResultSet rs) throws SQLException {
