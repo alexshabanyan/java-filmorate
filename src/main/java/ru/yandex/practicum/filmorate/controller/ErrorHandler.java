@@ -15,9 +15,10 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @RestControllerAdvice
+@Slf4j
 public class ErrorHandler {
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(final ValidationException e) {
@@ -34,6 +35,13 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleItemAlreadyExist(final ItemAlreadyExistException e) {
+        log.warn(e.getMessage(), e);
+        return new ErrorResponse(String.format("Объект с id=%s уже существует", e.getId()));
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleItemNotFound(final ItemNotFoundException e) {
         log.warn(e.getMessage(), e);
@@ -41,9 +49,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleItemAlreadyExist(final ItemAlreadyExistException e) {
-        log.warn(e.getMessage(), e);
-        return new ErrorResponse(String.format("Объект с id=%s уже существует", e.getId()));
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleRuntimeError(final Throwable e) {
+        log.error(e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
     }
 }
